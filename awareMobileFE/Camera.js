@@ -7,8 +7,7 @@ export default class Camera extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { 
-            identifedAs: '',
+        this.state = {
             loading: false
         }
     }
