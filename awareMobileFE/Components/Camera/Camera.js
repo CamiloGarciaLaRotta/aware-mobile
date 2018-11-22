@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { Dimensions, Alert, StyleSheet, ActivityIndicator, Button } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 
@@ -15,7 +15,7 @@ export default class Camera extends React.Component {
     takePicture = async function(){
 
         if (this.camera) {
-
+            console.log("start");
             // Pause the camera's preview
             this.camera.pausePreview();
 
@@ -31,7 +31,8 @@ export default class Camera extends React.Component {
 
             // Get the base64 version of the image
             const data = await this.camera.takePictureAsync(options)
-
+            console.log(data);
+            console.log("end");
         }
     }
 
@@ -39,6 +40,7 @@ export default class Camera extends React.Component {
         return (
             <RNCamera ref={ref => {this.camera = ref;}} style={styles.preview}>
                 <ActivityIndicator size="large" style={styles.loadingIndicator} color="#fff" animating={this.state.loading}/>
+                <Button onPress={this.props.onClick} onClick={this.takePicture.bind(this)} disabled={this.props.buttonDisabled} title="Capture" accessibilityLabel="Learn more about this button"/>
             </RNCamera>
             );
         }
