@@ -1,9 +1,12 @@
 "use strict";
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Slider } from 'react-native';
+import { ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 const landmarkSize = 5;
+
+const faceWidth = 80;
+const faceHeight = 80;
 
 // TODO choose whichever is better for the UX and image processing
 const accurateFaceMode = RNCamera.Constants.FaceDetection.Mode.accurate;
@@ -22,20 +25,15 @@ const recordOptions = {
     quality: RNCamera.Constants.VideoQuality["288p"],
 };
 
-const pictureOptions = {
-    base64: true,
-    doNotSave: true
-}
-
 export default class Camera extends React.Component {
   state = {
     type: 'back',
     flash: 'off',
-    photoId: 1,
+    photoId: -1,
     photos: [],
     faces: [],
-    faceDetectMode: accurateFaceMode,
-    isRecording: false
+    faceDetectMode: fastFaceMode,
+    isRecording: false,
   };
 
   toggleFacing() {
@@ -52,43 +50,75 @@ export default class Camera extends React.Component {
 
   takePicture = async function() {
     if (this.camera) {
-      // this.camera.takePictureAsync(pictureOptions).then(data => {
-      this.camera.takePictureAsync().then(data => {
-        console.log('data: ', data);
-      });
+      return this.camera.takePictureAsync()
     }
+    return Promise.reject(new Error('no camera found'));
   };
 
   takeVideo = async function() {
     if (this.camera) {
       try {
         const promise = this.camera.recordAsync(recordOptions);
-
         if (promise) {
           this.setState({ isRecording: true });
           const data = await promise;
           this.setState({ isRecording: false });
-          console.warn(data);
+          console.log(data);
         }
-      } catch (e) {
-        console.warn(e);
+      } catch (error) {
+        return Promise.reject(new Error(`takeVideo: ${error}`));
       }
     }
   }
 
-  // onFacesDetected = ({ faces }) => this.setState({ faces });
+  // gets called everytime the phone detects a new face
   onFacesDetected = ({ faces }) => {
+    // new face boxes and landmarks will be displayed everytime renderFaces() gets called
     this.setState({ faces });
+
+    // TODO not the best logic, but to throttle down the amount of pictures taken
+    // only take picture everytime a new face is identified 
     if (faces[0].faceID > this.state.photoId) {
+      this.setState({ photoId: faces[0].faceID })
+      console.log(`FACE COORDS:
+        (${faces[0].bounds.origin.x}, ${faces[0].bounds.origin.y})
+        W: ${faces[0].bounds.size.width}
+        H: ${faces[0].bounds.size.height}`)
+
       this.takePicture()
-      .then(() => console.log('PIC TAKEN'))
-      this.setState({photoId: faces[0].faceID})
+      .then(picture => {
+        console.log(picture);
+        return this.cropFace(faces[0].bounds, picture.uri);
+      })
+      .then(croppedPicture => console.log(`CROPPED IMG: ${croppedPicture}`))
+      .catch(err => console.log(err)); 
     }
   };
+
   onFaceDetectionError = state => console.warn('Faces detection error:', state);
+  
+  async cropFace(bounds, uri) {
+    return new Promise((resolve, reject) => {
+      
+      const cropData = {
+        offset:{
+          x:bounds.origin.x,
+          y:bounds.origin.y},
+        size:{width:bounds.size.width, height:bounds.size.height},
+        displaySize: {width:faceWidth, height:faceHeight},
+        resizeMode:'contain',
+      }
+    
+      try {
+          ImageEditor.cropImage(uri, cropData, 
+              (successURI) => resolve(successURI),
+              (error) => reject(`ImageEditor.cropImage: ${error}`),
+          );
+      } catch(error){ reject(`Error caught in this.cropImage: ${error}`) }
+    });
+  }
 
   renderFace({ bounds, faceID, rollAngle, yawAngle }) {
-    console.log(`FACE COORDS: (${bounds.origin.x}, ${bounds.origin.y})\tW: ${bounds.size.width}\tH: ${bounds.size.height}`)
     return (
       <View
         key={faceID}
