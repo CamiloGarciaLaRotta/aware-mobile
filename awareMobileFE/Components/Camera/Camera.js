@@ -38,23 +38,23 @@ export default class Camera extends React.Component {
     render() {
         return (
             <RNCamera ref={ref => {this.camera = ref;}} style={styles.preview}>
-            <ActivityIndicator size="large" style={styles.loadingIndicator} color="#fff" animating={this.state.loading}/>
+                <ActivityIndicator size="large" style={styles.loadingIndicator} color="#fff" animating={this.state.loading}/>
             </RNCamera>
-        );
+            );
+        }
     }
-}
 
-const styles = StyleSheet.create({
-    preview: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        height: Dimensions.get('window').height,
-        width: Dimensions.get('window').width,
-    },
-    loadingIndicator: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    }
-});
+    const styles = StyleSheet.create({
+        preview: {
+            flex: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            height: Dimensions.get('window').height,
+            width: Dimensions.get('window').width,
+        },
+        loadingIndicator: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+        }
+    });
