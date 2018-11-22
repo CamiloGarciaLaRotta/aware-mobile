@@ -52,7 +52,8 @@ export default class Camera extends React.Component {
 
   takePicture = async function() {
     if (this.camera) {
-      this.camera.takePictureAsync(pictureOptions).then(data => {
+      // this.camera.takePictureAsync(pictureOptions).then(data => {
+      this.camera.takePictureAsync().then(data => {
         console.log('data: ', data);
       });
     }
@@ -75,7 +76,15 @@ export default class Camera extends React.Component {
     }
   }
 
-  onFacesDetected = ({ faces }) => this.setState({ faces });
+  // onFacesDetected = ({ faces }) => this.setState({ faces });
+  onFacesDetected = ({ faces }) => {
+    this.setState({ faces });
+    if (faces[0].faceID > this.state.photoId) {
+      this.takePicture()
+      .then(() => console.log('PIC TAKEN'))
+      this.setState({photoId: faces[0].faceID})
+    }
+  };
   onFaceDetectionError = state => console.warn('Faces detection error:', state);
 
   renderFace({ bounds, faceID, rollAngle, yawAngle }) {
