@@ -1,6 +1,6 @@
 import React  from 'react';
 import { StyleSheet, View } from 'react-native';
-import Camera from './Camera.js';
+import Camera from './Components/Camera/Camera.js';
 
 export default class App extends React.Component {
 
@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         alignItems: 'center',
-        justifyContent: 'center',   
+        justifyContent: 'center',
     }
 });
