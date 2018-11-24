@@ -1,3 +1,4 @@
+//Uncomment line 13, 14, 36 and 203 to get face detection
 "use strict";
 import React from 'react';
 import { ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,8 +10,8 @@ const faceWidth = 80;
 const faceHeight = 80;
 
 // TODO choose whichever is better for the UX and image processing
-const accurateFaceMode = RNCamera.Constants.FaceDetection.Mode.accurate;
-const fastFaceMode =  RNCamera.Constants.FaceDetection.Mode.fast;
+//const accurateFaceMode = RNCamera.Constants.FaceDetection.Mode.accurate;
+//const fastFaceMode =  RNCamera.Constants.FaceDetection.Mode.fast;
 
 const flashModeOrder = {
     off: 'on',
@@ -32,7 +33,7 @@ export default class Camera extends React.Component {
     photoId: -1,
     photos: [],
     faces: [],
-    faceDetectMode: fastFaceMode,
+    //aceDetectMode: fastFaceMode,
     isRecording: false,
   };
 
@@ -199,7 +200,7 @@ export default class Camera extends React.Component {
           flex: 1,
         }}
         type={this.state.type}
-        flashMode={this.state.flash}
+        //flashMode={this.state.flash}
         faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
         onFacesDetected={this.onFacesDetected}
         onFaceDetectionError={this.onFaceDetectionError}

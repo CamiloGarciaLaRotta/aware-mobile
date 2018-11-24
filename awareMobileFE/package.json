@@ -13,8 +13,7 @@
     "react-dom": "^16.6.3",
     "react-native": "^0.57.5",
     "react-native-camera": "^1.4.3",
-    "react-native-camera-kit": "^6.3.0",
-    "reactstrap": "^6.5.0"
+    "react-native-camera-kit": "^6.3.0"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
