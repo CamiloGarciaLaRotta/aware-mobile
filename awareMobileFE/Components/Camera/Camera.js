@@ -3,26 +3,24 @@ import React from 'react';
 import { ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
+
+const faceWidth = 50
+const faceHeight = 500;
+const AWARE_API = "https://postman-echo.com/post" //TODO change for backend when ready
+
 const landmarkSize = 5;
 
-const faceWidth = 80;
-const faceHeight = 80;
-
-// TODO choose whichever is better for the UX and image processing
-const accurateFaceMode = RNCamera.Constants.FaceDetection.Mode.accurate;
-const fastFaceMode =  RNCamera.Constants.FaceDetection.Mode.fast;
-
 const flashModeOrder = {
-    off: 'on',
-    on: 'auto',
-    auto: 'torch',
-    torch: 'off',
+  off: 'on',
+  on: 'auto',
+  auto: 'torch',
+  torch: 'off',
 };
 
 const recordOptions = {
-    mute: false,
-    maxDuration: 5,
-    quality: RNCamera.Constants.VideoQuality["288p"],
+  mute: false,
+  maxDuration: 5,
+  quality: RNCamera.Constants.VideoQuality["288p"],
 };
 
 export default class Camera extends React.Component {
@@ -32,30 +30,19 @@ export default class Camera extends React.Component {
     photoId: -1,
     photos: [],
     faces: [],
-    faceDetectMode: fastFaceMode,
     isRecording: false,
   };
 
-  toggleFacing() {
-    this.setState({
-      type: this.state.type === 'back' ? 'front' : 'back',
-    });
-  }
+  toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
 
-  toggleFlash() {
-    this.setState({
-      flash: flashModeOrder[this.state.flash],
-    });
-  }
+  toggleFlash = () => this.setState({ flash: flashModeOrder[this.state.flash] });
 
-  takePicture = async function() {
-    if (this.camera) {
-      return this.camera.takePictureAsync()
-    }
+  takePicture = async () => {
+    if (this.camera) return this.camera.takePictureAsync();
     return Promise.reject(new Error('no camera found'));
   };
 
-  takeVideo = async function() {
+  takeVideo = async () => {
     if (this.camera) {
       try {
         const promise = this.camera.recordAsync(recordOptions);
@@ -73,31 +60,50 @@ export default class Camera extends React.Component {
 
   // gets called everytime the phone detects a new face
   onFacesDetected = ({ faces }) => {
+
     // new face boxes and landmarks will be displayed everytime renderFaces() gets called
     this.setState({ faces });
 
-    // TODO not the best logic, but to throttle down the amount of pictures taken
-    // only take picture everytime a new face is identified 
+    // not the best approach, 
+    // to throttle down the amount of pictures taken only take picture when a new face is identified 
     if (faces[0].faceID > this.state.photoId) {
       this.setState({ photoId: faces[0].faceID })
+
       console.log(`FACE COORDS:
         (${faces[0].bounds.origin.x}, ${faces[0].bounds.origin.y})
         W: ${faces[0].bounds.size.width}
         H: ${faces[0].bounds.size.height}`)
 
       this.takePicture()
-      .then(picture => {
-        console.log(picture);
-        return this.cropFace(faces[0].bounds, picture.uri);
-      })
-      .then(croppedPicture => console.log(`CROPPED IMG: ${croppedPicture}`))
+      .then(picture => this.cropFace(faces[0].bounds, picture.uri))
+      .then(croppedPicture => this.postImage(croppedPicture, AWARE_API))
+      .then(response => console.log("POSTED IMAGE: " + JSON.stringify(response, null, 4)))
       .catch(err => console.log(err)); 
     }
   };
 
-  onFaceDetectionError = state => console.warn('Faces detection error:', state);
-  
-  async cropFace(bounds, uri) {
+  postImage = async (imageURI, url) => {
+    return new Promise((resolve, reject) => {
+
+      let data = new FormData();
+      data.append('picture', {uri: imageURI, name: 'face.jpg', type: 'image/jpg'});
+      
+      const config = {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data;',
+        },
+        body: data,
+      }
+      
+      fetch(url, config)
+      .then(response => resolve(response.json()))
+      .catch(error => reject(`postImage: ${error}`));
+    });
+  }
+
+  cropFace = async (bounds, imageURI) => {
     return new Promise((resolve, reject) => {
       
       const cropData = {
@@ -110,10 +116,10 @@ export default class Camera extends React.Component {
       }
     
       try {
-          ImageEditor.cropImage(uri, cropData, 
-              (successURI) => resolve(successURI),
-              (error) => reject(`ImageEditor.cropImage: ${error}`),
-          );
+        ImageEditor.cropImage(imageURI, cropData, 
+          (successURI) => resolve(successURI),
+          (error) => reject(`ImageEditor.cropImage: ${error}`),
+        );
       } catch(error){ reject(`Error caught in this.cropImage: ${error}`) }
     });
   }
@@ -202,8 +208,6 @@ export default class Camera extends React.Component {
         flashMode={this.state.flash}
         faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
         onFacesDetected={this.onFacesDetected}
-        onFaceDetectionError={this.onFaceDetectionError}
-        faceDetectMode={this.state.faceDetectMode}
         permissionDialogTitle={'Permission to use camera'}
         permissionDialogMessage={'We need your permission to use your camera phone'}
       >
