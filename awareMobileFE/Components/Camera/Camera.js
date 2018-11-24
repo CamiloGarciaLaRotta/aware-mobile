@@ -200,8 +200,8 @@ export default class Camera extends React.Component {
           flex: 1,
         }}
         type={this.state.type}
-        //flashMode={this.state.flash}
-        faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
+        flashMode={this.state.flash}
+        //faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
         onFacesDetected={this.onFacesDetected}
         onFaceDetectionError={this.onFaceDetectionError}
         faceDetectMode={this.state.faceDetectMode}
