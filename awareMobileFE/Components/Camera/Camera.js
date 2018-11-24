@@ -1,6 +1,6 @@
 "use strict";
 import React from 'react';
-import { ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 
@@ -31,6 +31,7 @@ export default class Camera extends React.Component {
     photos: [],
     faces: [],
     isRecording: false,
+    faceURI: '',
   };
 
   toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
@@ -75,8 +76,12 @@ export default class Camera extends React.Component {
         H: ${faces[0].bounds.size.height}`)
 
       this.takePicture()
-      .then(picture => this.cropFace(faces[0].bounds, picture.uri))
-      .then(croppedPicture => this.postImage(croppedPicture, AWARE_API))
+      // .then(picture => this.cropFace(faces[0].bounds, picture.uri))
+      .then(croppedPicture => {
+        console.log(croppedPicture)
+        this.setState({faceURI: croppedPicture.uri});
+        return this.postImage(croppedPicture.uri, AWARE_API);
+      })
       .then(response => console.log("POSTED IMAGE: " + JSON.stringify(response, null, 4)))
       .catch(err => console.log(err)); 
     }
@@ -124,7 +129,7 @@ export default class Camera extends React.Component {
     });
   }
 
-  renderFace({ bounds, faceID, rollAngle, yawAngle }) {
+  renderFace = ({ bounds, faceID, rollAngle, yawAngle }) => {
     return (
       <View
         key={faceID}
@@ -148,22 +153,22 @@ export default class Camera extends React.Component {
       </View>
     );
   }
-
+  
   renderLandmarksOfFace(face) {
     const renderLandmark = position =>
       position && (
         <View
-          style={[
-            styles.landmark,
-            {
-              left: position.x - landmarkSize / 2,
-              top: position.y - landmarkSize / 2,
-            },
-          ]}
+        style={[
+          styles.landmark,
+          {
+            left: position.x - landmarkSize / 2,
+            top: position.y - landmarkSize / 2,
+          },
+        ]}
         />
-      );
-    return (
-      <View key={`landmarks-${face.faceID}`}>
+        );
+        return (
+          <View key={`landmarks-${face.faceID}`}>
         {renderLandmark(face.leftEyePosition)}
         {renderLandmark(face.rightEyePosition)}
         {renderLandmark(face.leftEarPosition)}
@@ -178,7 +183,7 @@ export default class Camera extends React.Component {
       </View>
     );
   }
-
+  
   renderFaces() {
     return (
       <View style={styles.facesContainer} pointerEvents="none">
@@ -186,7 +191,7 @@ export default class Camera extends React.Component {
       </View>
     );
   }
-
+  
   renderLandmarks() {
     return (
       <View style={styles.facesContainer} pointerEvents="none">
@@ -194,23 +199,23 @@ export default class Camera extends React.Component {
       </View>
     );
   }
-
+  
   render() {
     return (
       <RNCamera
-        ref={ref => {
-          this.camera = ref;
-        }}
-        style={{
-          flex: 1,
-        }}
-        type={this.state.type}
+      ref={ref => {
+        this.camera = ref;
+      }}
+      style={{
+        flex: 1,
+      }}
+      type={this.state.type}
         flashMode={this.state.flash}
         faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
         onFacesDetected={this.onFacesDetected}
         permissionDialogTitle={'Permission to use camera'}
         permissionDialogMessage={'We need your permission to use your camera phone'}
-      >
+        >
         <View
           style={{
             flex: 0.5,
@@ -218,52 +223,11 @@ export default class Camera extends React.Component {
             flexDirection: 'row',
             justifyContent: 'space-around',
           }}
-        >
+          >
           <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
             <Text style={styles.flipText}> FLIP </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
-            <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flex: 0.1,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-          }}
-        >
-          <TouchableOpacity
-            style={[styles.flipButton, {
-              flex: 0.3,
-              alignSelf: 'flex-end',
-              backgroundColor: this.state.isRecording ? 'white' : 'darkred',
-            }]}
-            onPress={this.state.isRecording ? () => {} : this.takeVideo.bind(this)}
-          >
-            {
-              this.state.isRecording ?
-              <Text style={styles.flipText}> ☕ </Text>
-              :
-              <Text style={styles.flipText}> REC </Text>
-            }
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flex: 0.1,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-          }}
-        >
-          <TouchableOpacity
-            style={[styles.flipButton, styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
-            onPress={this.takePicture.bind(this)}
-          >
-            <Text style={styles.flipText}> SNAP </Text>
-          </TouchableOpacity>
+          { this.state.faceURI !== '' && <Image source={{uri: this.state.faceURI}} style={styles.faceButton} /> }
         </View>
         {this.renderFaces()}
         {this.renderLandmarks()}
@@ -279,6 +243,20 @@ const styles = StyleSheet.create({
   flipButton: {
     flex: 0.3,
     height: 40,
+    marginHorizontal: 2,
+    marginBottom: 10,
+    marginTop: 20,
+    borderRadius: 8,
+    borderColor: 'white',
+    borderWidth: 1,
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  faceButton: {
+    flex: 0.3,
+    height: 80,
+    width: 80,
     marginHorizontal: 2,
     marginBottom: 10,
     marginTop: 20,
