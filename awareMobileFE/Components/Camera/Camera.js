@@ -1,12 +1,12 @@
 "use strict";
 import React from 'react';
-import { Image, ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageEditor, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 
 const faceWidth = 50
 const faceHeight = 500;
-const AWARE_API = "https://postman-echo.com/post" //TODO change for backend when ready
+const AWARE_API = "http://aware-api.azurewebsites.net/api/process" //TODO change for backend when ready
 
 const landmarkSize = 5;
 
@@ -39,7 +39,8 @@ export default class Camera extends React.Component {
   toggleFlash = () => this.setState({ flash: flashModeOrder[this.state.flash] });
 
   takePicture = async () => {
-    if (this.camera) return this.camera.takePictureAsync();
+    const pictureOptions = Platform.OS === 'ios' ? { forceUpOrientation: true } : { fixOrientation: true };
+    if (this.camera) return this.camera.takePictureAsync(pictureOptions);
     return Promise.reject(new Error('no camera found'));
   };
 
@@ -76,11 +77,11 @@ export default class Camera extends React.Component {
         H: ${faces[0].bounds.size.height}`)
 
       this.takePicture()
-      // .then(picture => this.cropFace(faces[0].bounds, picture.uri))
-      .then(croppedPicture => {
-        console.log(croppedPicture)
-        this.setState({faceURI: croppedPicture.uri});
-        return this.postImage(croppedPicture.uri, AWARE_API);
+      .then(picture => {
+        console.log('PICTURE TAKEN:')
+        console.log(picture)
+        this.setState({faceURI: picture.uri});
+        return this.postImage(picture.uri, AWARE_API);
       })
       .then(response => console.log("POSTED IMAGE: " + JSON.stringify(response, null, 4)))
       .catch(err => console.log(err)); 
@@ -89,8 +90,9 @@ export default class Camera extends React.Component {
 
   postImage = async (imageURI, url) => {
     return new Promise((resolve, reject) => {
-
+      
       let data = new FormData();
+      data.append('id', this.props.id);
       data.append('picture', {uri: imageURI, name: 'face.jpg', type: 'image/jpg'});
       
       const config = {
@@ -158,17 +160,17 @@ export default class Camera extends React.Component {
     const renderLandmark = position =>
       position && (
         <View
-        style={[
-          styles.landmark,
-          {
-            left: position.x - landmarkSize / 2,
-            top: position.y - landmarkSize / 2,
-          },
-        ]}
+          style={[
+            styles.landmark,
+            {
+              left: position.x - landmarkSize / 2,
+              top: position.y - landmarkSize / 2,
+            },
+          ]}
         />
         );
-        return (
-          <View key={`landmarks-${face.faceID}`}>
+    return (
+      <View key={`landmarks-${face.faceID}`}>
         {renderLandmark(face.leftEyePosition)}
         {renderLandmark(face.rightEyePosition)}
         {renderLandmark(face.leftEarPosition)}
@@ -237,9 +239,6 @@ export default class Camera extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  navigation: {
-    flex: 1,
-  },
   flipButton: {
     flex: 0.3,
     height: 40,
@@ -255,8 +254,8 @@ const styles = StyleSheet.create({
   },
   faceButton: {
     flex: 0.3,
-    height: 80,
-    width: 80,
+    height: 90,
+    width: 50,
     marginHorizontal: 2,
     marginBottom: 10,
     marginTop: 20,
@@ -270,18 +269,6 @@ const styles = StyleSheet.create({
   flipText: {
     color: 'white',
     fontSize: 15,
-  },
-  item: {
-    margin: 4,
-    backgroundColor: 'indianred',
-    height: 35,
-    width: 80,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  picButton: {
-    backgroundColor: 'darkseagreen',
   },
   facesContainer: {
     position: 'absolute',
@@ -311,8 +298,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 10,
     backgroundColor: 'transparent',
-  },
-  row: {
-    flexDirection: 'row',
   },
 });
