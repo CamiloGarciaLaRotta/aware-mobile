@@ -1,65 +1,29 @@
 "use strict";
 import React from 'react';
-import { Image, ImageEditor, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
-
-const faceWidth = 50
-const faceHeight = 500;
-const AWARE_API = "http://aware-api.azurewebsites.net/api/process" //TODO change for backend when ready
+const AWARE_API = "http://aware-api.azurewebsites.net/api/process" 
 
 const landmarkSize = 5;
-
-const flashModeOrder = {
-  off: 'on',
-  on: 'auto',
-  auto: 'torch',
-  torch: 'off',
-};
-
-const recordOptions = {
-  mute: false,
-  maxDuration: 5,
-  quality: RNCamera.Constants.VideoQuality["288p"],
-};
 
 export default class Camera extends React.Component {
   state = {
     type: 'back',
-    flash: 'off',
     photoId: -1,
     photos: [],
     faces: [],
-    isRecording: false,
     faceURI: '',
   };
 
   toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
 
-  toggleFlash = () => this.setState({ flash: flashModeOrder[this.state.flash] });
-
   takePicture = async () => {
-    const pictureOptions = Platform.OS === 'ios' ? { forceUpOrientation: true } : { fixOrientation: true };
+    const pictureOptions = Platform.OS === 'ios' ? {forceUpOrientation: true, base64: true} : {fixOrientation: true, base64: true};
     if (this.camera) return this.camera.takePictureAsync(pictureOptions);
     return Promise.reject(new Error('no camera found'));
   };
-
-  takeVideo = async () => {
-    if (this.camera) {
-      try {
-        const promise = this.camera.recordAsync(recordOptions);
-        if (promise) {
-          this.setState({ isRecording: true });
-          const data = await promise;
-          this.setState({ isRecording: false });
-          console.log(data);
-        }
-      } catch (error) {
-        return Promise.reject(new Error(`takeVideo: ${error}`));
-      }
-    }
-  }
-
+  
   // gets called everytime the phone detects a new face
   onFacesDetected = ({ faces }) => {
 
@@ -78,56 +42,32 @@ export default class Camera extends React.Component {
 
       this.takePicture()
       .then(picture => {
-        console.log('PICTURE TAKEN:')
-        console.log(picture)
+        console.log(`PICTURE TAKEN: ${picture.uri}`)
         this.setState({faceURI: picture.uri});
-        return this.postImage(picture.uri, AWARE_API);
+        return this.postImage(picture.base64, AWARE_API);
       })
       .then(response => console.log("POSTED IMAGE: " + JSON.stringify(response, null, 4)))
       .catch(err => console.log(err)); 
     }
   };
 
-  postImage = async (imageURI, url) => {
-    return new Promise((resolve, reject) => {
-      
-      let data = new FormData();
-      data.append('id', this.props.id);
-      data.append('picture', {uri: imageURI, name: 'face.jpg', type: 'image/jpg'});
-      
+  postImage = async (imgBase64, url) => {
+    return new Promise((resolve, reject) => {      
       const config = {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data;',
+          'Content-Type': 'application/json;',
         },
-        body: data,
+        body: JSON.stringify({
+          id: this.props.id,
+          picture: imgBase64,
+        }),
       }
       
       fetch(url, config)
       .then(response => resolve(response.json()))
       .catch(error => reject(`postImage: ${error}`));
-    });
-  }
-
-  cropFace = async (bounds, imageURI) => {
-    return new Promise((resolve, reject) => {
-      
-      const cropData = {
-        offset:{
-          x:bounds.origin.x,
-          y:bounds.origin.y},
-        size:{width:bounds.size.width, height:bounds.size.height},
-        displaySize: {width:faceWidth, height:faceHeight},
-        resizeMode:'contain',
-      }
-    
-      try {
-        ImageEditor.cropImage(imageURI, cropData, 
-          (successURI) => resolve(successURI),
-          (error) => reject(`ImageEditor.cropImage: ${error}`),
-        );
-      } catch(error){ reject(`Error caught in this.cropImage: ${error}`) }
     });
   }
 

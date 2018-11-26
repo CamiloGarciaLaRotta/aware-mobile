@@ -11,10 +11,7 @@ export default class App extends React.Component {
         this.getID()
     }
 
-    state = {
-      loading: true,
-      id: '',
-    }
+    state = { id: '' }
 
     getID = async () => {
       const url = 'http://aware-api.azurewebsites.net/api/register'
