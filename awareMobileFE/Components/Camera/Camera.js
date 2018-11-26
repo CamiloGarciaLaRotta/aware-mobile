@@ -1,8 +1,9 @@
-//Uncomment line 13, 14, 36 and 203 to get face detection
+//Uncomment line 14, 15, 37 and 205 to get face detection, (227-250) for record button, (251-265) for snap button, (212-226) for flip and flash button
 "use strict";
 import React from 'react';
 import { ImageEditor, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+
 
 const landmarkSize = 5;
 
@@ -28,7 +29,7 @@ const recordOptions = {
 
 export default class Camera extends React.Component {
   state = {
-    type: 'back',
+    type: 'front',
     flash: 'off',
     photoId: -1,
     photos: [],
@@ -208,7 +209,7 @@ export default class Camera extends React.Component {
         permissionDialogTitle={'Permission to use camera'}
         permissionDialogMessage={'We need your permission to use your camera phone'}
       >
-        <View
+        {/*<View
           style={{
             flex: 0.5,
             backgroundColor: 'transparent',
@@ -222,8 +223,8 @@ export default class Camera extends React.Component {
           <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
             <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
           </TouchableOpacity>
-        </View>
-        <View
+        </View>*/}
+        {/*<View
           style={{
             flex: 0.1,
             backgroundColor: 'transparent',
@@ -246,8 +247,8 @@ export default class Camera extends React.Component {
               <Text style={styles.flipText}> REC </Text>
             }
           </TouchableOpacity>
-        </View>
-        <View
+        </View>*/}
+        {/*<View
           style={{
             flex: 0.1,
             backgroundColor: 'transparent',
@@ -261,7 +262,7 @@ export default class Camera extends React.Component {
           >
             <Text style={styles.flipText}> SNAP </Text>
           </TouchableOpacity>
-        </View>
+        </View>*/}
         {this.renderFaces()}
         {this.renderLandmarks()}
       </RNCamera>
