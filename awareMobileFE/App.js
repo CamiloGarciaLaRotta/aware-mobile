@@ -3,14 +3,14 @@ import React from 'react';
 import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import Aware from './Components/Aware/Aware.js'
 
-const API_URL = 'http://aware-api.azurewebsites.net'
+const API_URL = 'https://aware-api.azurewebsites.net'
 
 export default class App extends React.Component {
 
     constructor(props) {
-        super(props);
-        process.nextTick = setImmediate;
-        this.getID()
+      super(props);
+      process.nextTick = setImmediate;
+      this.getID()
     }
 
     state = { id: '' }
@@ -32,11 +32,15 @@ export default class App extends React.Component {
     }
 
     render() {
-        return (
-            <View style={styles.container}>
-                {this.state.id === '' ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
-            </View>
-        )
+      return (
+        <View style={{
+          flex: 1,
+          paddingTop: 10,
+          backgroundColor: '#000',
+        }}>
+          {this.state.id === '' ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
+        </View>
+      )
     }
 }
 
@@ -65,8 +69,6 @@ const Welcome = () => {
 
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
-      paddingTop: 10,
-      backgroundColor: '#000',
+    
   },
 });
