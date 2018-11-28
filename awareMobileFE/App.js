@@ -16,10 +16,9 @@ export default class App extends React.Component {
     getID = async () => {
       const url = 'http://aware-api.azurewebsites.net/api/register'
       const config = {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json;',
         },
       }
       
