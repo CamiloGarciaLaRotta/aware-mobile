@@ -1,7 +1,9 @@
 "use strict";
 import React from 'react';
 import { ImageBackground, StyleSheet, Text, View } from 'react-native';
-import Camera from './Components/Camera/Camera.js'
+import Aware from './Components/Aware/Aware.js'
+
+const API_URL = 'http://aware-api.azurewebsites.net'
 
 export default class App extends React.Component {
 
@@ -14,18 +16,16 @@ export default class App extends React.Component {
     state = { id: '' }
 
     getID = async () => {
-      const url = 'http://aware-api.azurewebsites.net/api/register'
       const config = {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
-      }
-      
-      fetch(url, config)
+      }      
+      fetch(API_URL+'/api/register', config)
       .then(response => response.json())
       .then(data => {
-        console.log(`BACKEND GRANTED ID: ${data}`)
+        console.log(`BACKEND GRANTED ID: ${data.id}`)
         return this.setState({id: data})
       })
       .catch(error => console.warn(`Obtaining ID: ${error}`));
@@ -34,14 +34,14 @@ export default class App extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-                {this.state.id === '' ? <Welcome /> : <Camera id={this.state.id} />}
+                {this.state.id === '' ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
             </View>
         )
     }
 }
 
 const Welcome = () => {
-  const text = 'Aware';
+  const title = 'Aware';
 
   return (
     <ImageBackground
@@ -57,7 +57,7 @@ const Welcome = () => {
           color: '#ff6700'
         }}
       >
-        {text}
+        {title}
       </Text>
     </ImageBackground>
   );
