@@ -11,9 +11,15 @@ export default class App extends React.Component {
       super(props);
       process.nextTick = setImmediate;
       this.getID()
+      this.startTimeout()
     }
 
-    state = { id: '' }
+    state = { 
+      id: '',
+      loading: true,
+    }
+
+    startTimeout = () => setTimeout(() => this.setState({loading: false}), 3000);
 
     getID = async () => {
       const config = {
@@ -38,7 +44,7 @@ export default class App extends React.Component {
           paddingTop: 10,
           backgroundColor: '#000',
         }}>
-          {this.state.id === '' ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
+          {this.state.id === '' || this.state.loading ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
         </View>
       )
     }
