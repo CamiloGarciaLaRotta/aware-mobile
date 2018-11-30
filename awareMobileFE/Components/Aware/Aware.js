@@ -1,6 +1,6 @@
 "use strict";
 import React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { RNCamera } from 'react-native-camera'; 
 
 const landmarkSize = 5;
@@ -48,9 +48,10 @@ export default class Aware extends React.Component {
       })
       .then(response => {
         console.log("AWARENESS RESULTS: " + JSON.stringify(response, null, 4));
-        const sleepy = (parseFloat(response.Sleepy) * 100).toFixed();
+        let sleepy = ((1.0-(parseFloat(response.Sleepy))) * 100).toFixed();
+        if (sleepy < 75) { sleepy -= 47}
         this.setState({sleepyPercentage: sleepy})
-        if (sleepy > 20) { this.incrementSleepyCounter() }
+        if (sleepy > 50) { this.incrementSleepyCounter() }
       })
       .catch(err => console.log(err)); 
     }
@@ -58,10 +59,26 @@ export default class Aware extends React.Component {
 
   incrementSleepyCounter = () => {
     this.setState({sleepyCounter: this.state.sleepyCounter + 1})
-    console.log(this.state.sleepyCounter)
-    if (this.state.sleepyCounter > 3) {
-      console.log("MORE THAN 5 TIMES")
+    console.log(`SLEEPY COUNTER: ${this.state.sleepyCounter}`)
+    if (this.state.sleepyCounter >= 3) {
+      console.log("SLEEPy ALERT")
+      const PATTERN = [500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000]
+      Vibration.vibrate(PATTERN)
+      this.setState({sleepyCounter: 2})
     }
+  }
+
+  renderAlert = () => {
+    return Alert.alert(
+      'Awareness Alert',
+      'Consitent high sleepiness',
+      [
+        {text: 'Call Taxi', onPress: () => console.log('ignored')},
+        {text: 'Cancel', onPress: () => console.log('Cancelled'), style: 'cancel'},
+        {text: 'Look for coffeshops', onPress: () => console.log('OKed')},
+      ],
+      { cancelable: false }
+    )
   }
  
   postImage = async (imgBase64, url) => {
@@ -231,6 +248,7 @@ export default class Aware extends React.Component {
           </View>
           {this.renderFaces()}
           {this.renderLandmarks()}
+          {this.state.sleepyCounter >= 3 && this.renderAlert()}
         </RNCamera>
       </View>
     );
