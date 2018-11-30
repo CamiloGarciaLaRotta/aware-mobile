@@ -12,6 +12,8 @@ export default class Aware extends React.Component {
     photos: [],
     faces: [],
     faceURI: '',
+    sleepyCounter: 0,
+    sleepyPercentage: 0,
   };
 
   toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
@@ -40,15 +42,28 @@ export default class Aware extends React.Component {
 
       this.takePicture()
       .then(picture => {
-        console.log(`PICTURE TAKEN: ${picture.uri}`)
+        console.log(`PICTURE TAKEN: ${picture.uri}`);
         this.setState({faceURI: picture.uri});
-        return this.postImage(picture.base64, this.props.apiURL+'/api/process');
+        return this.postImage('data:image/jpeg;base64,'+picture.base64, this.props.apiURL+'/api/process');
       })
-      .then(response => console.log("POSTED IMAGE: " + JSON.stringify(response, null, 4)))
+      .then(response => {
+        console.log("AWARENESS RESULTS: " + JSON.stringify(response, null, 4));
+        const sleepy = (parseFloat(response.Sleepy) * 100).toFixed();
+        this.setState({sleepyPercentage: sleepy})
+        if (sleepy > 20) { this.incrementSleepyCounter() }
+      })
       .catch(err => console.log(err)); 
     }
   };
 
+  incrementSleepyCounter = () => {
+    this.setState({sleepyCounter: this.state.sleepyCounter + 1})
+    console.log(this.state.sleepyCounter)
+    if (this.state.sleepyCounter > 3) {
+      console.log("MORE THAN 5 TIMES")
+    }
+  }
+ 
   postImage = async (imgBase64, url) => {
     return new Promise((resolve, reject) => {
       const config = {
@@ -172,13 +187,13 @@ export default class Aware extends React.Component {
           </View>
           <View style={styles.driverDataLevelFrame}>
             <View style={styles.intoxicatedLevelFrame}>
-              <Text style={styles.intoxicatedLevel}>10%</Text>
+              <Text style={styles.intoxicatedLevel}>-</Text>
             </View>
             <View style={styles.sleepinessLevelFrame}>
-              <Text style={styles.sleepinessLevel}>18%</Text>
+              <Text style={styles.sleepinessLevel}>{this.state.sleepyPercentage}%</Text>
             </View>
             <View style={styles.distractedLevelFrame}>
-              <Text style={styles.distractedLevel}>34%</Text>
+              <Text style={styles.distractedLevel}>-</Text>
             </View>
           </View>
         </View>
