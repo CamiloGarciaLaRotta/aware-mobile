@@ -71,11 +71,14 @@ export default class Aware extends React.Component {
         return this.postImage('data:image/jpeg;base64,'+picture.base64, this.props.apiURL+'/api/process');
       })
       .then(response => {
-        console.log("AWARENESS RESULTS: " + JSON.stringify(response, null, 4));
-        let sleepy = ((1.0-(parseFloat(response.Sleepy))) * 100).toFixed();
-        if (sleepy < 75) { sleepy -= 47}
-        this.setState({sleepyPercentage: sleepy})
-        if (sleepy > 50) { this.incrementSleepyCounter() }
+        console.log("AWARENESS RESULTS: ");
+        console.log(response);
+        if (response.hasOwnProperty('Sleepy')) {
+          let sleepy = ((1.0-(parseFloat(response.Sleepy))) * 100).toFixed();
+          if (sleepy < 75) { sleepy -= 47}
+          this.setState({sleepyPercentage: sleepy})
+          if (sleepy > 50) { this.incrementSleepyCounter() }
+        }
       })
       .catch(err => console.log(err)); 
     }
