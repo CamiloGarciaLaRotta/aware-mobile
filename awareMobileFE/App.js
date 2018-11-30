@@ -1,6 +1,7 @@
 "use strict";
 import React from 'react';
 import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { BarIndicator } from 'react-native-indicators';
 import Aware from './Components/Aware/Aware.js'
 
 const API_URL = 'https://aware-api.azurewebsites.net'
@@ -42,7 +43,6 @@ export default class App extends React.Component {
         <View style={{
           flex: 1,
           paddingTop: 10,
-          backgroundColor: '#000',
         }}>
           {this.state.id === '' || this.state.loading ? <Welcome /> : <Aware apiURL={API_URL} id={this.state.id} />}
         </View>
@@ -54,27 +54,26 @@ const Welcome = () => {
   const title = 'Aware';
 
   return (
-    <ImageBackground
-      source={{uri: 'https://image.freepik.com/free-vector/beautiful-design_1176-257.jpg'}}
-      style={{width: '100%', height: '100%'}}
-    >  
-      <Text
-        style={{
-          backgroundColor: 'transparent',
-          textAlign: 'center',
-          padding: 20,
-          fontSize: 50,
-          color: '#ff6700'
-        }}
-      >
+    <View style={styles.container} >  
+      <Text style={styles.welcomeText} >
         {title}
       </Text>
-    </ImageBackground>
+      <BarIndicator color="#97d4fb" style={styles.welcomeAnimation}/>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    
+    backgroundColor: "white"
   },
+  welcomeText: {
+    textAlign: 'center',
+    paddingTop: "50%",
+    fontWeight: "bold",
+    fontSize: 60,
+  },
+  welcomeAnimation: {
+    paddingTop: "10%",
+  }
 });

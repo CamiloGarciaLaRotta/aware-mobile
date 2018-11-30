@@ -1,13 +1,13 @@
 "use strict";
 import React from 'react';
 import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
-import { RNCamera } from 'react-native-camera'; 
+import { RNCamera } from 'react-native-camera';
 
 const landmarkSize = 5;
 
 export default class Aware extends React.Component {
   state = {
-    type: 'back',
+    type: 'front',
     photoId: -1,
     photos: [],
     faces: [],
@@ -15,6 +15,30 @@ export default class Aware extends React.Component {
     sleepyCounter: 0,
     sleepyPercentage: 0,
   };
+
+  backgroundLightMode(){
+    if(this.state.isLight) {
+      return "black"
+    }
+    else {
+      return "white"
+    }
+  }
+
+  foregroundLightMode(){
+    if(this.state.isLight) {
+      return "#7F8C8D"
+    }
+    else {
+      return "#97d4fb"
+    }
+  }
+
+  switchLightMode(){
+    this.setState({isLight: !this.state.isLight});
+    this.backgroundLightMode();
+    this.foregroundLightMode();
+  }
 
   toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
 
@@ -174,8 +198,8 @@ export default class Aware extends React.Component {
   
   render() {
     return (
-      <View style={styles.container} >
-        <View style={styles.driverDataFrame}>
+      <View style={[styles.container, {backgroundColor: this.backgroundLightMode()}]} >
+        <View style={[styles.driverDataFrame, {backgroundColor: this.foregroundLightMode()}]}>
           <View style={styles.driverDataHeaderFrame}>
             <Text style={styles.driverDataHeader}>Driver Data</Text>
           </View>
@@ -222,7 +246,7 @@ export default class Aware extends React.Component {
           style={styles.camera}
           type={this.state.type}
           flashMode={this.state.flash}
-          faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
+          //faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
           onFacesDetected={this.onFacesDetected}
           permissionDialogTitle={'Permission to use camera'}
           permissionDialogMessage={'We need your permission to use your camera phone'}
@@ -240,8 +264,8 @@ export default class Aware extends React.Component {
                 justifyContent: 'space-around',
               }}
               >
-              <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
-                <Text style={styles.flipText}> FLIP </Text>
+              <TouchableOpacity style={styles.flipButton} onPress={this.switchLightMode.bind(this)}>
+                <Image source={require("../../assets/lightIcon.png")} style={styles.lightButton}/>
               </TouchableOpacity>
               { this.state.faceURI !== '' && <Image source={{uri: this.state.faceURI}} style={styles.faceButton} /> }
             </View>
@@ -269,7 +293,6 @@ const styles = StyleSheet.create({
     marginLeft: "2%",
     marginRight: "2%",
     borderRadius: 15,
-    backgroundColor: "grey"
   },
   driverDataIconFrame: {
     flex: 0.35,
@@ -297,7 +320,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     fontSize: 30,
     fontWeight: "bold",
-    color: "white",
     textAlign:"center",
     // backgroundColor: "red",
   },
@@ -385,14 +407,15 @@ const styles = StyleSheet.create({
   },
 
   flipButton: {
-    flex: 0.3,
-    height: 40,
+    height: 60,
+    width: 60,
     marginHorizontal: 2,
     marginBottom: 10,
     marginTop: 20,
-    borderRadius: 8,
+    borderRadius: 30,
     borderColor: 'white',
-    borderWidth: 1,
+    backgroundColor: 'black',
+    borderWidth: 2,
     padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -440,4 +463,6 @@ const styles = StyleSheet.create({
     margin: 10,
     backgroundColor: 'transparent',
   },
+  lightButton: {
+  }
 });
