@@ -2,13 +2,12 @@
 import React from 'react';
 import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import {StatusBar} from "react-native";
 
 const landmarkSize = 5;
 
 export default class Aware extends React.Component {
   state = {
-    type: 'back',
+    type: 'front',
     photoId: -1,
     photos: [],
     faces: [],
@@ -28,11 +27,9 @@ export default class Aware extends React.Component {
 
   foregroundLightMode(){
     if(this.state.isLight) {
-      StatusBar.setBarStyle("light-content");
       return "#7F8C8D"
     }
     else {
-      StatusBar.setBarStyle("dark-content");
       return "#97d4fb"
     }
   }
@@ -205,7 +202,6 @@ export default class Aware extends React.Component {
   render() {
     return (
       <View style={[styles.container, {backgroundColor: this.backgroundLightMode()}]} >
-        <View style={styles.spacer}/>
         <View style={[styles.driverDataFrame, {backgroundColor: this.foregroundLightMode()}]}>
           <View style={styles.driverDataHeaderFrame}>
             <Text style={styles.driverDataHeader}>Driver Data</Text>
@@ -235,13 +231,13 @@ export default class Aware extends React.Component {
           </View>
           <View style={styles.driverDataLevelFrame}>
             <View style={styles.intoxicatedLevelFrame}>
-              <Text style={styles.intoxicatedLevel}>1%</Text>
+              <Text style={styles.intoxicatedLevel}>-</Text>
             </View>
             <View style={styles.sleepinessLevelFrame}>
-              <Text style={styles.sleepinessLevel}>84%</Text>
+              <Text style={styles.sleepinessLevel}>{this.state.sleepyPercentage}%</Text>
             </View>
             <View style={styles.distractedLevelFrame}>
-              <Text style={styles.distractedLevel}>3%</Text>
+              <Text style={styles.distractedLevel}>-</Text>
             </View>
           </View>
         </View>
@@ -291,18 +287,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
   },
-  spacer: {
-    flex: 0.04,
-  },
+  
   // AWARENESS FRAMES
   driverDataFrame: {
-    flex: 0.26,
+    flex: 0.40,
     opacity: 1,
     flexDirection: "column",
     marginLeft: "2%",
     marginRight: "2%",
-    marginBottom: "2%",
-    borderRadius: 30,
+    borderRadius: 15,
   },
   driverDataIconFrame: {
     flex: 0.35,
@@ -312,7 +305,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "green",
   },
   driverDataLevelFrame: {
-    flex: 0.35,
+    flex: 0.20,
     flexDirection: "row",
     marginLeft: "2%",
     marginRight: "2%",
@@ -322,16 +315,15 @@ const styles = StyleSheet.create({
 
   // TITLE
   driverDataHeaderFrame: {
-    flex: 0.3,
+    flex: 0.15,
     marginLeft: "2%",
     marginRight: "2%",
   },
   driverDataHeader: {
     opacity: 0.7,
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
-    marginTop: "3%",
-    marginLeft: "3%",
+    textAlign:"center",
     // backgroundColor: "red",
   },
 
@@ -372,15 +364,15 @@ const styles = StyleSheet.create({
   // AWARENESS ICONS
   intoxicatedIcon: {
     opacity: 0.5,
-    flex: 1.0,
+    flex: 0.8,
   },
   sleepinessIcon: {
     opacity: 0.5,
-    flex: 1.0,
+    flex: 1,
   },
   distractedIcon: {
     opacity: 0.5,
-    flex: 0.8,
+    flex: 0.7,
     // backgroundColor: 'yellow',
   },
 
@@ -406,13 +398,11 @@ const styles = StyleSheet.create({
 
   // CAMERA
   camera: {
-    flex: 0.7,
+    flex: 0.6,
     flexDirection: "column",
     marginLeft: "2%",
     marginRight: "2%",
-    marginBottom: "2%",
-    borderRadius: 30,
-    overflow: "hidden"
+    borderRadius: 15,
   },
 
   cameraOptions: {
@@ -423,8 +413,8 @@ const styles = StyleSheet.create({
     height: 60,
     width: 60,
     marginHorizontal: 2,
-    marginBottom: 5,
-    marginTop: 60,
+    marginBottom: 10,
+    marginTop: 20,
     borderRadius: 30,
     borderColor: 'white',
     backgroundColor: 'black',
