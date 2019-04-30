@@ -1,5 +1,6 @@
 # Aware - Front-End
 
+![](http://i.imgur.com/n7RSAVY.jpg)
 
 ## Table of contents
 1. [ Background ](#background)
